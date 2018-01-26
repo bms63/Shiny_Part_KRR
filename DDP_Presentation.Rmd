@@ -7,26 +7,106 @@ output:
   widescreen: true
 ---
 
+<style type="text/css">
+slides > slide:not(.nobackground):after {
+  content: '';
+}
+</style>
+
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+# setting global chunk options
+knitr::opts_chunk$set(echo = FALSE);knitr::opts_chunk$set(message = FALSE);knitr::opts_chunk$set(warning = FALSE);knitr::opts_chunk$set(comment = "")
+knitr::opts_chunk$set(cache = TRUE, cache.lazy = FALSE)
+library(caret)
 ```
 
-## R Markdown
+## Overview
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+This was built for the Course project in Developing Data Products as part of the Coursera Data Science Specialization.
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+The app developed for the first part of the assignment is avalilable at: https://benstraub.shinyapps.io/Shiny_Part_KRR/
 
-```{r cars}
-summary(cars)
+Source code for ui.R and server.R files are available on the GitHub repo: https://github.com/bms63/Shiny_Part_KRR
+
+## Application Functionality
+
+The site provides a brief and simple example of kernel regularized least squares.
+
+__Description:__ The App leverages the package KLRS, which implements Kernel-based Regularized Least Squares (KRLS), a machine learning method to fit multidimensional functions y=f(x) for regression and classification problems without relying on linearity or additivity assumptions. KRLS finds the best fitting function by minimizing the squared loss of a Tikhonov regularization problem, using Gaussian kernels as radial basis functions. For further details see Hainmueller and Hazlett (2014).
+
+Data is generated from a $cos(x)+sin(x)$ on the interval $(-4\pi, 4\pi)$.
+
+The task for the user is to explore different pairs of lambda, $\lambda$, and sigma,$\sigma$, to recreate the curve from the plotted data.
+
+## $\lambda = 3, \sigma=2$
+
+Here the orginal curve is in black and the curve created by kernel regularized least squares is in red.
+
+```{r}
+set.seed(2)
+
+x <- seq(-4*pi,4*pi,.01)
+y <- cos(x) + sin(x)
+data <- as.data.frame(cbind(x,y))
+
+set.seed(2)
+trainIndex <- createDataPartition(y=data$y, times = 1, p = 0.5, list = FALSE)
+dataTrain <- data[trainIndex,]
+dataTrain <- dataTrain[-(1:2),]
+dataTest  <- data[-trainIndex,]
+xtrain <- dataTrain$x
+ytrain <- dataTrain$y
+xtest <- dataTest$x
+
+kernridge <- function(xtrain, ytrain, type, kpar, lambda, xtest)
+{
+  N = length(xtrain)
+  I = diag(x=1, nrow=N, ncol=N)
+  K = kerneloption(xtrain,xtrain,type,kpar)
+  alpha = solve(K + lambda*I)%*%ytrain
+  K2 = kerneloption(xtest,xtrain,type,kpar)
+  ytest <- K2%*%alpha
+  newList <- list("alpha"=alpha, "ytest"=ytest)
+  plot(xtest, ytest, col="red", type="l",ylim=c(-2,2), main = paste(type, " Kernel", sep =""))
+  lines(data)
+}
+
+kerneloption <- function(x,y,type,kpar){
+  if (type == "Gauss") {  #Gaussian kernel
+    sgm = kpar	# kernel width
+    dim1 = dim(t(x))
+    dim2 = dim(t(y))
+    norms1 = as.matrix(x^2)
+    norms2 = as.matrix(y^2)
+    mat1 <- matrix(norms1, nrow = length(x), ncol =length(x))
+    mat2 <- t(matrix(norms2, nrow = length(y), 
+                     ncol=length(y)))
+    
+    distmat = mat1 + mat2 - 2*x%*%t(y)	# full distance matrix
+    K = exp(-distmat/(2*sgm^2))
+    
+  } else if (type == "Linear") {
+    K = x%*%t(y)
+  }
+  else if (type == "Polynomial") {
+    p=kpar[1]
+    c=kpar[2]
+    K = (x%*%t(y) + c)^p
+  }
+} 
+
+sintest <- kernridge(xtrain,ytrain, "Gauss", 3, 2, xtest)
 ```
 
-## Including Plots
 
-You can also embed plots, for example:
+## Try it out
 
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
+It's pretty cool that our least squares methods when using the kernel method can recreate a $cos(x) + sin(x)$ curve!!
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+Now give it a try on the shiny app!  Thanks!
+
+https://benstraub.shinyapps.io/Shiny_Part_KRR/
+
+
+
+
