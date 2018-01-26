@@ -40,7 +40,8 @@ shinyUI(pageWithSidebar(
                          p("Please give it a try in the y=cos(x)+sin(x) tab and moving around the lambada and sigma inputs"),
                          p("Click the checkbox to display the optimal pair"),
                          p("For more information on KRLS check out, http://homepages.rpi.edu/~bennek/class/mds/lecture/lecture6-06.pdf"),
-                         p("Source code for ui.R and server.R files are available on the GitHub repo: https://github.com/b33lie/shiny_app_mtcars")
+                         p("Source code for ui.R and server.R files are available on the", a("https://github.com/bms63/Shiny_Part_KRR", 
+          href = " https://github.com/bms63/Shiny_Part_KRR"))
                          
                       
                 ), 

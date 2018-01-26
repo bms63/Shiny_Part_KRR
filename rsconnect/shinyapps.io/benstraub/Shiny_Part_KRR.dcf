@@ -5,9 +5,9 @@ account: benstraub
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 262896
-bundleId: 1194836
+bundleId: 1194852
 url: https://benstraub.shinyapps.io/Shiny_Part_KRR/
-when: 1516994729.57492
+when: 1516995209.23491
 asMultiple: FALSE
 asStatic: FALSE
 ignoredFiles: KRR_with_kmeans_and_noise.png
